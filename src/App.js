@@ -1,16 +1,7 @@
 import React, { useState, useEffect } from "react";
 import "./App.css";
 
-const initialExpense = { 
-  id: "", 
-  amount: "", 
-  date: "", 
-  category: "", 
-  customCategory: "", 
-  note: "", 
-  showCalendar: false 
-};
-
+const initialExpense = { id: "", amount: "", date: "", category: "", note: "" };
 const categories = ["Food", "Travel", "Bills", "Others"];
 
 export default function App() {
@@ -33,7 +24,6 @@ export default function App() {
     if (!form.amount || Number(form.amount) <= 0) e.amount = "Amount must be positive";
     if (!form.date) e.date = "Date is required";
     if (!form.category) e.category = "Category is required";
-    if (form.category === "Others" && !form.customCategory.trim()) e.customCategory = "Please specify category";
     setErrors(e);
     return Object.keys(e).length === 0;
   };
@@ -48,14 +38,12 @@ export default function App() {
     e.preventDefault();
     if (!validate()) return;
 
-    const categoryToSave = form.category === "Others" ? form.customCategory.trim() : form.category;
-
     if (editMode) {
       setExpenses(exp =>
-        exp.map(item => (item.id === form.id ? { ...form, category: categoryToSave } : item))
+        exp.map(item => (item.id === form.id ? { ...form } : item))
       );
     } else {
-      setExpenses(exp => [...exp, { ...form, category: categoryToSave, id: Date.now().toString() }]);
+      setExpenses(exp => [...exp, { ...form, id: Date.now().toString() }]);
     }
     resetForm();
   };
@@ -63,9 +51,7 @@ export default function App() {
   const onEdit = (id) => {
     const exp = expenses.find(e => e.id === id);
     if (exp) {
-      const cat = categories.includes(exp.category) ? exp.category : "Others";
-      const customCat = cat === "Others" ? exp.category : "";
-      setForm({ ...exp, category: cat, customCategory: customCat, showCalendar: false });
+      setForm(exp);
       setEditMode(true);
       setErrors({});
     }
@@ -78,10 +64,9 @@ export default function App() {
     }
   };
 
-  // Format date in dd-mm-yyyy for displaying expense list
+  // Helper to format date in dd-mm-yyyy
   const formatDate = (dateStr) => {
     const d = new Date(dateStr);
-    if (isNaN(d)) return dateStr; // fallback if invalid date
     const day = String(d.getDate()).padStart(2, "0");
     const month = String(d.getMonth() + 1).padStart(2, "0");
     const year = d.getFullYear();
@@ -101,7 +86,6 @@ export default function App() {
             min="0"
             value={form.amount}
             onChange={e => setForm({ ...form, amount: e.target.value })}
-            placeholder="Amount in ₹"
           />
           <div style={{ color: "red", fontSize: 12 }}>{errors.amount}</div>
         </div>
@@ -109,13 +93,9 @@ export default function App() {
         <div style={{ marginBottom: 10 }}>
           <label>Date</label><br />
           <input
-            type={form.showCalendar ? "date" : "text"}
-            placeholder="Enter date (YYYY-MM-DD)"
+            type="date"
             value={form.date}
-            onFocus={() => setForm({ ...form, showCalendar: true })}
-            onBlur={() => setTimeout(() => setForm({ ...form, showCalendar: false }), 200)}
             onChange={e => setForm({ ...form, date: e.target.value })}
-            style={{ width: "100%" }}
           />
           <div style={{ color: "red", fontSize: 12 }}>{errors.date}</div>
         </div>
@@ -132,19 +112,6 @@ export default function App() {
             ))}
           </select>
           <div style={{ color: "red", fontSize: 12 }}>{errors.category}</div>
-
-          {form.category === "Others" && (
-            <>
-              <input
-                type="text"
-                value={form.customCategory}
-                onChange={e => setForm({ ...form, customCategory: e.target.value })}
-                placeholder="Enter custom category"
-                style={{ marginTop: 8, width: "100%", padding: 6, boxSizing: "border-box" }}
-              />
-              <div style={{ color: "red", fontSize: 12 }}>{errors.customCategory}</div>
-            </>
-          )}
         </div>
 
         <div style={{ marginBottom: 10 }}>
