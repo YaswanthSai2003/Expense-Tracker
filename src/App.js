@@ -19,10 +19,28 @@ export default function App() {
     localStorage.setItem("expenses", JSON.stringify(expenses));
   }, [expenses]);
 
+  // Validate dd-mm-yyyy format
+  const isValidDateFormat = (dateStr) => {
+    const regex = /^(0[1-9]|[12][0-9]|3[01])-(0[1-9]|1[0-2])-\d{4}$/;
+    if (!regex.test(dateStr)) return false;
+    // Further validate if date is real calendar date
+    const parts = dateStr.split("-");
+    const day = parseInt(parts[0], 10);
+    const month = parseInt(parts[1], 10) - 1;
+    const year = parseInt(parts[2], 10);
+    const date = new Date(year, month, day);
+    return (
+      date.getFullYear() === year &&
+      date.getMonth() === month &&
+      date.getDate() === day
+    );
+  };
+
   const validate = () => {
     const e = {};
     if (!form.amount || Number(form.amount) <= 0) e.amount = "Amount must be positive";
     if (!form.date) e.date = "Date is required";
+    else if (!isValidDateFormat(form.date)) e.date = "Date must be in dd-mm-yyyy format";
     if (!form.category) e.category = "Category is required";
     setErrors(e);
     return Object.keys(e).length === 0;
@@ -64,14 +82,8 @@ export default function App() {
     }
   };
 
-  // Helper to format date in dd-mm-yyyy
-  const formatDate = (dateStr) => {
-    const d = new Date(dateStr);
-    const day = String(d.getDate()).padStart(2, "0");
-    const month = String(d.getMonth() + 1).padStart(2, "0");
-    const year = d.getFullYear();
-    return `${day}-${month}-${year}`;
-  };
+  // Format date string dd-mm-yyyy for display (already in correct format)
+  const formatDate = (dateStr) => dateStr;
 
   return (
     <div style={{ maxWidth: 600, margin: "auto", padding: 20, fontFamily: "Arial, sans-serif" }}>
@@ -91,11 +103,12 @@ export default function App() {
         </div>
 
         <div style={{ marginBottom: 10 }}>
-          <label>Date</label><br />
+          <label>Date (dd-mm-yyyy)</label><br />
           <input
-            type="date"
+            type="text"
             value={form.date}
             onChange={e => setForm({ ...form, date: e.target.value })}
+            placeholder="dd-mm-yyyy"
           />
           <div style={{ color: "red", fontSize: 12 }}>{errors.date}</div>
         </div>
