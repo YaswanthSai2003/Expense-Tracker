@@ -44,4 +44,4 @@ Add an expense like this:
 
 | Amount  | Date       | Category | Note   |
 | ------- | ---------- | -------- | ------ |
-| ₹500.00 | 2025-10-05 | Food     | Dinner |
+| ₹500.00 | 05-10-2025 | Food     | Dinner |

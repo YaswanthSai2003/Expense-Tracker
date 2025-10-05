@@ -64,6 +64,15 @@ export default function App() {
     }
   };
 
+  // Helper to format date in dd-mm-yyyy
+  const formatDate = (dateStr) => {
+    const d = new Date(dateStr);
+    const day = String(d.getDate()).padStart(2, "0");
+    const month = String(d.getMonth() + 1).padStart(2, "0");
+    const year = d.getFullYear();
+    return `${day}-${month}-${year}`;
+  };
+
   return (
     <div style={{ maxWidth: 600, margin: "auto", padding: 20, fontFamily: "Arial, sans-serif" }}>
       <h1>Personal Expense Tracker</h1>
@@ -139,7 +148,7 @@ export default function App() {
             {expenses.map(({ id, amount, date, category, note }) => (
               <tr key={id} style={{ borderBottom: "1px solid #eee" }}>
                 <td>₹{parseFloat(amount).toFixed(2)}</td>
-                <td>{date}</td>
+                <td>{formatDate(date)}</td>
                 <td>{category}</td>
                 <td>{note}</td>
                 <td>
