@@ -1,7 +1,16 @@
 import React, { useState, useEffect } from "react";
 import "./App.css";
 
-const initialExpense = { id: "", amount: "", date: "", category: "", customCategory: "", note: "" };
+const initialExpense = { 
+  id: "", 
+  amount: "", 
+  date: "", 
+  category: "", 
+  customCategory: "", 
+  note: "", 
+  showCalendar: false 
+};
+
 const categories = ["Food", "Travel", "Bills", "Others"];
 
 export default function App() {
@@ -56,7 +65,7 @@ export default function App() {
     if (exp) {
       const cat = categories.includes(exp.category) ? exp.category : "Others";
       const customCat = cat === "Others" ? exp.category : "";
-      setForm({ ...exp, category: cat, customCategory: customCat });
+      setForm({ ...exp, category: cat, customCategory: customCat, showCalendar: false });
       setEditMode(true);
       setErrors({});
     }
@@ -100,9 +109,13 @@ export default function App() {
         <div style={{ marginBottom: 10 }}>
           <label>Date</label><br />
           <input
-            type="date"
+            type={form.showCalendar ? "date" : "text"}
+            placeholder="Enter date (YYYY-MM-DD)"
             value={form.date}
+            onFocus={() => setForm({ ...form, showCalendar: true })}
+            onBlur={() => setTimeout(() => setForm({ ...form, showCalendar: false }), 200)}
             onChange={e => setForm({ ...form, date: e.target.value })}
+            style={{ width: "100%" }}
           />
           <div style={{ color: "red", fontSize: 12 }}>{errors.date}</div>
         </div>
