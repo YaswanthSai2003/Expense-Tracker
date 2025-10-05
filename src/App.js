@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import "./App.css";
 
-const initialExpense = { id: "", amount: "", date: "", category: "", note: "" };
+const initialExpense = { id: "", amount: "", date: "", category: "", customCategory: "", note: "" };
 const categories = ["Food", "Travel", "Bills", "Others"];
 
 export default function App() {
@@ -19,29 +19,12 @@ export default function App() {
     localStorage.setItem("expenses", JSON.stringify(expenses));
   }, [expenses]);
 
-  // Validate date format
-  const isValidDateFormat = (dateStr) => {
-    const regex = /^(0[1-9]|[12][0-9]|3[01])-(0[1-9]|1[0-2])-\d{4}$/;
-    if (!regex.test(dateStr)) return false;
-    // Further validate if date is real calendar date
-    const parts = dateStr.split("-");
-    const day = parseInt(parts[0], 10);
-    const month = parseInt(parts[1], 10) - 1;
-    const year = parseInt(parts[2], 10);
-    const date = new Date(year, month, day);
-    return (
-      date.getFullYear() === year &&
-      date.getMonth() === month &&
-      date.getDate() === day
-    );
-  };
-
   const validate = () => {
     const e = {};
     if (!form.amount || Number(form.amount) <= 0) e.amount = "Amount must be positive";
     if (!form.date) e.date = "Date is required";
-    else if (!isValidDateFormat(form.date)) e.date = "Date must be in dd-mm-yyyy format";
     if (!form.category) e.category = "Category is required";
+    if (form.category === "Others" && !form.customCategory.trim()) e.customCategory = "Please specify category";
     setErrors(e);
     return Object.keys(e).length === 0;
   };
@@ -56,12 +39,14 @@ export default function App() {
     e.preventDefault();
     if (!validate()) return;
 
+    const categoryToSave = form.category === "Others" ? form.customCategory.trim() : form.category;
+
     if (editMode) {
       setExpenses(exp =>
-        exp.map(item => (item.id === form.id ? { ...form } : item))
+        exp.map(item => (item.id === form.id ? { ...form, category: categoryToSave } : item))
       );
     } else {
-      setExpenses(exp => [...exp, { ...form, id: Date.now().toString() }]);
+      setExpenses(exp => [...exp, { ...form, category: categoryToSave, id: Date.now().toString() }]);
     }
     resetForm();
   };
@@ -69,7 +54,9 @@ export default function App() {
   const onEdit = (id) => {
     const exp = expenses.find(e => e.id === id);
     if (exp) {
-      setForm(exp);
+      const cat = categories.includes(exp.category) ? exp.category : "Others";
+      const customCat = cat === "Others" ? exp.category : "";
+      setForm({ ...exp, category: cat, customCategory: customCat });
       setEditMode(true);
       setErrors({});
     }
@@ -82,8 +69,15 @@ export default function App() {
     }
   };
 
-  // Format date string dd-mm-yyyy for display (already in correct format)
-  const formatDate = (dateStr) => dateStr;
+  // Format date in dd-mm-yyyy for displaying expense list
+  const formatDate = (dateStr) => {
+    const d = new Date(dateStr);
+    if (isNaN(d)) return dateStr; // fallback if invalid date
+    const day = String(d.getDate()).padStart(2, "0");
+    const month = String(d.getMonth() + 1).padStart(2, "0");
+    const year = d.getFullYear();
+    return `${day}-${month}-${year}`;
+  };
 
   return (
     <div style={{ maxWidth: 600, margin: "auto", padding: 20, fontFamily: "Arial, sans-serif" }}>
@@ -98,17 +92,17 @@ export default function App() {
             min="0"
             value={form.amount}
             onChange={e => setForm({ ...form, amount: e.target.value })}
+            placeholder="Amount in ₹"
           />
           <div style={{ color: "red", fontSize: 12 }}>{errors.amount}</div>
         </div>
 
         <div style={{ marginBottom: 10 }}>
-          <label>Date </label><br />
+          <label>Date</label><br />
           <input
-            type="text"
+            type="date"
             value={form.date}
             onChange={e => setForm({ ...form, date: e.target.value })}
-            placeholder="dd-mm-yyyy"
           />
           <div style={{ color: "red", fontSize: 12 }}>{errors.date}</div>
         </div>
@@ -125,6 +119,19 @@ export default function App() {
             ))}
           </select>
           <div style={{ color: "red", fontSize: 12 }}>{errors.category}</div>
+
+          {form.category === "Others" && (
+            <>
+              <input
+                type="text"
+                value={form.customCategory}
+                onChange={e => setForm({ ...form, customCategory: e.target.value })}
+                placeholder="Enter custom category"
+                style={{ marginTop: 8, width: "100%", padding: 6, boxSizing: "border-box" }}
+              />
+              <div style={{ color: "red", fontSize: 12 }}>{errors.customCategory}</div>
+            </>
+          )}
         </div>
 
         <div style={{ marginBottom: 10 }}>
