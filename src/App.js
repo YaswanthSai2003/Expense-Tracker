@@ -19,7 +19,7 @@ export default function App() {
     localStorage.setItem("expenses", JSON.stringify(expenses));
   }, [expenses]);
 
-  // Validate dd-mm-yyyy format
+  // Validate date format
   const isValidDateFormat = (dateStr) => {
     const regex = /^(0[1-9]|[12][0-9]|3[01])-(0[1-9]|1[0-2])-\d{4}$/;
     if (!regex.test(dateStr)) return false;
@@ -103,7 +103,7 @@ export default function App() {
         </div>
 
         <div style={{ marginBottom: 10 }}>
-          <label>Date (dd-mm-yyyy)</label><br />
+          <label>Date </label><br />
           <input
             type="text"
             value={form.date}
